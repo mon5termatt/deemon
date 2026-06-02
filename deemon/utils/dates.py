@@ -24,10 +24,12 @@ def get_max_release_date(days):
 
 
 def get_year(release_date: str):
+    release_date = normalize_release_date(release_date)
     return datetime.strptime(release_date, '%Y-%m-%d').year
 
 
 def format_date_string(d: str):
+    d = normalize_release_date(d)
     date_string = datetime.strptime(d, "%Y-%m-%d")
     return datetime.strftime(date_string, "%Y-%m-%d")
 
@@ -35,9 +37,28 @@ def ui_date(d: datetime):
     return datetime.strftime(d, '%b %d, %Y')
 
 def str_to_datetime_obj(d: str) -> datetime:
-    if d == "0000-00-00":
-        d = "1980-01-01"
-    return datetime.strptime(d, "%Y-%m-%d")
+    # Deezer sometimes returns an "unknown" date with year `0000`
+    # which Python cannot parse (year 0 is out of range).
+    d = normalize_release_date(d)
+    try:
+        return datetime.strptime(d, "%Y-%m-%d")
+    except ValueError:
+        # Last-resort fallback for unexpected formats.
+        return datetime.strptime("1980-01-01", "%Y-%m-%d")
+
+
+def normalize_release_date(d: str) -> str:
+    """
+    Normalize a release date string into a `YYYY-MM-DD` parseable value.
+
+    If year is `0000` (unknown) or input is empty, return `1980-01-01`.
+    """
+    if not d:
+        return "1980-01-01"
+    d = str(d).strip()
+    if d == "0000-00-00" or d.startswith("0000-"):
+        return "1980-01-01"
+    return d
 
 
 def get_friendly_date(d: int):

@@ -6,7 +6,7 @@ from deemon.core.common import map_track as new_map_track
 import deezer.utils
 deezer.utils.map_track = new_map_track
 
-__version__ = '2.22'
+__version__ = '2.23'
 __dbversion__ = '3.7'
 
 appdata = startup.get_appdata_dir()
