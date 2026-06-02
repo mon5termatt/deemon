@@ -3,8 +3,10 @@ import platform
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 
 import click
+import requests
 from packaging.version import parse as parse_version
 
 from deemon import __version__
@@ -244,7 +246,41 @@ def monitor_command(artist, im, playlist, include_artists, bitrate, record_type,
 
     if url:
         artist_id = True
-        urls = [x.replace(",", "") for x in artist]
+        def normalize_and_expand_url(raw_url: str) -> str:
+            if not raw_url:
+                return raw_url
+            u = raw_url.strip()
+            if not u:
+                return u
+            if "://" not in u:
+                u = "https://" + u.lstrip("/")
+            try:
+                parsed = urlparse(u)
+            except Exception:
+                return u
+
+            host = (parsed.netloc or "").lower()
+            needs_expand = host in {"deezer.page.link", "dzr.page.link", "link.deezer.com"}
+            if not needs_expand:
+                if not any(f"/{g}/" in parsed.path for g in ("artist", "album", "track", "playlist")):
+                    needs_expand = True
+
+            if needs_expand:
+                try:
+                    resp = requests.get(u, allow_redirects=True, timeout=15, stream=True)
+                    u = str(resp.url)
+                except Exception as e:
+                    logger.debug(f"Failed to expand URL via redirects: {raw_url} ({e})")
+                    u = raw_url.strip()
+
+            try:
+                parsed2 = urlparse(u)
+                u = urlunparse((parsed2.scheme, parsed2.netloc, parsed2.path, "", "", ""))
+            except Exception:
+                pass
+            return u
+
+        urls = [normalize_and_expand_url(x.replace(",", "")) for x in artist]
         artist = []
         for u in urls:
             id_from_url = u.split('/artist/')

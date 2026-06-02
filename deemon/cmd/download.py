@@ -5,6 +5,7 @@ import sys
 import requests
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 from tqdm import tqdm
 
 import deemix.errors
@@ -250,6 +251,58 @@ class Download:
     def download(self, artist, artist_id, album_id, url,
                  artist_file, track_file, album_file, track_id, auto=True, monitored=False):
 
+        def normalize_and_expand_url(raw_url: str) -> str:
+            """
+            Normalize URL for ID extraction.
+
+            - Strips whitespace
+            - Removes query/fragment
+            - Follows redirects for known Deezer short/share hosts
+            """
+            if not raw_url:
+                return raw_url
+
+            u = raw_url.strip()
+            if not u:
+                return u
+
+            # Add a scheme if user supplied a bare domain/path.
+            if "://" not in u:
+                u = "https://" + u.lstrip("/")
+
+            try:
+                parsed = urlparse(u)
+            except Exception:
+                return u
+
+            # Decide if we should follow redirects (short links, share links, etc.)
+            host = (parsed.netloc or "").lower()
+            needs_expand = host in {"deezer.page.link", "dzr.page.link", "link.deezer.com"}
+
+            if not needs_expand:
+                # If it doesn't already contain a Deezer entity path, try to expand anyway.
+                # This covers other redirectors while keeping canonical URLs fast.
+                if not any(f"/{g}/" in parsed.path for g in ("artist", "album", "track", "playlist")):
+                    needs_expand = True
+
+            if needs_expand:
+                try:
+                    # Use GET (streamed) because some services don't redirect on HEAD.
+                    resp = requests.get(u, allow_redirects=True, timeout=15, stream=True)
+                    u = str(resp.url)
+                except Exception as e:
+                    logger.debug(f"Failed to expand URL via redirects: {raw_url} ({e})")
+                    u = raw_url.strip()
+
+            # Remove query/fragment for stable parsing (supports share links with utm_*).
+            try:
+                parsed2 = urlparse(u)
+                u = urlunparse((parsed2.scheme, parsed2.netloc, parsed2.path, "", "", ""))
+            except Exception:
+                pass
+
+            return u
+
         def filter_artist_by_record_type(artist):
             album_api = self.api.get_artist_albums(query={'artist_name': '', 'artist_id': artist['id']})
             filtered_albums = []
@@ -361,6 +414,7 @@ class Download:
 
         def extract_id_from_url(url):
             id_group = ['artist', 'album', 'track', 'playlist']
+            url = normalize_and_expand_url(url)
             for group in id_group:
                 id_type = group
                 try:
@@ -478,7 +532,8 @@ class Download:
         if url:
             logger.debug("Processing URLs")
             for u in url:
-                egroup, eid = extract_id_from_url(u)
+                expanded = normalize_and_expand_url(u)
+                egroup, eid = extract_id_from_url(expanded)
                 if not egroup or not eid:
                     logger.error(f"Invalid URL -- {u}")
                     continue
