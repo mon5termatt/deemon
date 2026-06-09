@@ -12,7 +12,7 @@ permalink: /
 deemon is a monitoring utility for new artist releases that can provide email alerts and automate downloading via the deemix library
 {: .fs-6 .fw-300 }
 
-[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } [View it on GitHub](https://github.com/digitalec/deemon){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } [View it on GitHub]({{ site.github.repository_url | default: site.repository_url | default: "https://github.com/mon5termatt/deemon" }}){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 <small>Version 2.22</small>
 ---
@@ -49,4 +49,4 @@ releases by some of my favorite artists.
 
 ### License
 
-deemon is distributed by a [GPL-3.0 license](https://github.com/digitalec/deemon/blob/main/LICENSE).
+deemon is distributed by a [GPL-3.0 license]({{ site.github.repository_url | default: site.repository_url | default: "https://github.com/mon5termatt/deemon" }}/blob/main/LICENSE).

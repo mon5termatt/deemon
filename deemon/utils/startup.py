@@ -6,6 +6,8 @@ from pathlib import Path
 import requests
 from packaging.version import parse as parse_version
 
+from deemon.utils.repo import get_github_api_repo_url
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,8 +97,7 @@ def get_latest_version(release_type):
 
 def get_changelog(ver: str):
     try:
-        response = requests.get("https://api.github.com/repos/digitalec/"
-                                "deemon/releases")
+        response = requests.get(f"{get_github_api_repo_url()}/releases")
     except requests.exceptions.ConnectionError:
         return print("Unable to reach GitHub API")
     

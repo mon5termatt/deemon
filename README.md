@@ -15,6 +15,15 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+### Run without activating `.venv`
+
+If you prefer not to `source .venv/bin/activate`, you can use the repo wrapper:
+
+```bash
+./bin/deemon --help
+./bin/deemon monitor
+```
+
 ### Initialize local app data
 
 ```bash
@@ -48,8 +57,9 @@ deemon test -e
 
 ## Documentation
 
+- Online docs: https://mon5termatt.github.io/deemon/
 - CLI help: `deemon <command> -h`
-- Additional docs shipped in-repo under `docs/docs/`
+- Source docs in-repo under `docs/`
 
 ## Contributing
 

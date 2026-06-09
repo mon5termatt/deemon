@@ -1,6 +1,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 from deemon import __version__
+from deemon.utils.repo import get_github_repo_url
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
@@ -26,7 +27,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.8",
     install_requires=required,
-    url="https://github.com/digitalec/deemon",
+    url=get_github_repo_url(),
     entry_points = {
         "console_scripts": ["deemon=deemon.__main__:main"],
     }

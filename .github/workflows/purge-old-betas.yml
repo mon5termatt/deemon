@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: dev-drprasad/delete-older-releases@v0.2.0
       with:
-        repo: digitalec/deemon # defaults to current repo
+        repo: mon5termatt/deemon # defaults to current repo
         keep_latest: 0
         delete_tag_pattern: b # defaults to ""
       env:

@@ -1,1 +1,22 @@
-remote_theme: pmarsceill/just-the-docs
+title: deemon
+description: Monitoring utility for new artist releases with email alerts and automated downloading via deemix
+url: "https://mon5termatt.github.io"
+baseurl: "/deemon"
+repository: mon5termatt/deemon
+
+remote_theme: just-the-docs/just-the-docs@v0.10.0
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+
+permalink: pretty
+
+aux_links:
+  deemon on GitHub:
+    - "https://github.com/mon5termatt/deemon"
+
+color_scheme: nil
+search_enabled: true
+heading_anchors: true

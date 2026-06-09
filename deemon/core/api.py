@@ -240,7 +240,7 @@ class PlatformAPI:
                                        f"{query['artist_name']} - {r['ALB_TITLE']}")
                         release_date = datetime.strftime(datetime.today(), "%Y-%m-%d")
                     
-                    cover_art = f"https://e-cdns-images.dzcdn.net/images/cover/{r['ALB_PICTURE']}/500x500-00000-80-0-0.jpg"
+                    cover_art = f"https://e-cdns-images.dzcdn.net/images/cover/{r['ALB_PICTURE']}/500x500-000000-80-0-0.jpg"
                     album_url = f"https://www.deezer.com/album/{r['ALB_ID']}"
                     
                     api_result.append(

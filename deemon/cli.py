@@ -22,6 +22,7 @@ from deemon.core.config import Config, LoadProfile
 from deemon.core.db import Database
 from deemon.core.logger import setup_logger
 from deemon.utils import startup, dataprocessor, validate
+from deemon.utils.repo import get_github_releases_url, get_github_repo_url
 
 logger = None
 config = None
@@ -39,11 +40,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.version_option(__version__, '-V', '--version', message='deemon %(version)s')
 @click.option('-v', '--verbose', is_flag=True, help="Show debug output")
 def run(whats_new, init, arl, verbose, profile):
-    """Monitoring and alerting tool for new music releases using the Deezer API.
-
-    deemon is a free and open source tool. To report issues or to contribute,
-    please visit https://github.com/digitalec/deemon
-    """
+    """Monitoring and alerting tool for new music releases using the Deezer API."""
     global logger
     global config
     global db
@@ -112,7 +109,7 @@ def run(whats_new, init, arl, verbose, profile):
                 print("*" * 80)
                 logger.info(f"deemon {parse_version(new_version).major} is available. "
                             f"Please see the release notes before upgrading.")
-                logger.info("Release notes available at: https://github.com/digitalec/deemon/releases")
+                logger.info(f"Release notes available at: {get_github_releases_url()}")
                 print("*" * 80)
             else:
                 config.set('update_available', new_version, False)
@@ -128,12 +125,23 @@ def run(whats_new, init, arl, verbose, profile):
     config.set("start_time", int(time.time()), False)
 
 
+run.__doc__ = (
+    "Monitoring and alerting tool for new music releases using the Deezer API.\n\n"
+    "deemon is a free and open source tool. To report issues or to contribute,\n"
+    f"please visit {get_github_repo_url()}"
+)
+
+
 @run.command(name='test')
-@click.option('-e', '--email', is_flag=True, help="Send test notification to configured email")
+@click.option('-e', '--email', is_flag=True, help="Send plaintext test notification to configured email")
+@click.option('--email-html', is_flag=True, help="Send HTML test notification with sample release data")
 @click.option('-E', '--exclusions', metavar="URL", type=str, help="Test exclude regex pattern against URL")
-def test(email, exclusions):
+def test(email, email_html, exclusions):
     """Run tests on email configuration, exclusion filters, etc."""
-    if email:
+    if email_html:
+        notification = notifier.Notify()
+        notification.test_html()
+    elif email:
         notification = notifier.Notify()
         notification.test()
     elif exclusions:

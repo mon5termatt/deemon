@@ -12,8 +12,25 @@ import pkgutil
 
 from deemon import __version__
 from deemon.core.config import Config as config
+from deemon.utils.repo import get_github_repo_url
 
 logger = logging.getLogger(__name__)
+
+SAMPLE_RELEASES = [
+    {
+        'release_date': datetime.now().strftime('%Y-%m-%d'),
+        'releases': [
+            {
+                'artist': 'deemon',
+                'album': 'Test Album (email preview)',
+                'cover': 'https://e-cdns-images.dzcdn.net/images/cover/5718f7c81c27e0b2417e2a4c45224f8a/500x500-000000-80-0-0.jpg',
+                'url': 'https://www.deezer.com/album/302127',
+                'track_num': 12,
+                'record_type': 'album',
+            }
+        ],
+    }
+]
 
 
 class Notify:
@@ -43,17 +60,27 @@ class Notify:
         logger.debug("Sending notification email")
         logger.debug(f"Using server: {config.smtp_server()}:{config.smtp_port()}")
 
-        if config.smtp_starttls():
-            with smtplib.SMTP(config.smtp_server(), config.smtp_port()) as server:
-                server.starttls()
-                server.login(config.smtp_user(), config.smtp_pass())
-                server.sendmail(config.smtp_sender(), config.smtp_recipient(), body.as_string())
-                logger.debug("Email notification has been sent")
-        else:
-            with smtplib.SMTP_SSL(config.smtp_server(), config.smtp_port(), context=context) as server:
-                server.login(config.smtp_user(), config.smtp_pass())
-                server.sendmail(config.smtp_sender(), config.smtp_recipient(), body.as_string())
-                logger.debug("Email notification has been sent")
+        try:
+            if config.smtp_starttls():
+                with smtplib.SMTP(config.smtp_server(), config.smtp_port()) as server:
+                    server.starttls()
+                    server.login(config.smtp_user(), config.smtp_pass())
+                    server.sendmail(config.smtp_sender(), config.smtp_recipient(), body.as_string())
+            else:
+                with smtplib.SMTP_SSL(config.smtp_server(), config.smtp_port(), context=context) as server:
+                    server.login(config.smtp_user(), config.smtp_pass())
+                    server.sendmail(config.smtp_sender(), config.smtp_recipient(), body.as_string())
+        except Exception as e:
+            if test:
+                logger.error(f"   [!] Failed to send test notification: {e}")
+            else:
+                logger.error(f"Failed to send email notification: {e}")
+            return False
+
+        logger.debug("Email notification has been sent")
+        if test:
+            logger.info(f"   Test notification sent to {config.smtp_recipient()}")
+        return True
 
     def construct_header(self, is_plain_text=True, subject=None):
         subject = subject or self.subject
@@ -86,6 +113,14 @@ class Notify:
         msg = self.construct_header(subject="deemon Test Notification")
         msg.set_content("Congrats! You'll now receive new release notifications.")
         self.send(msg, test=True)
+
+    def test_html(self):
+        """
+        Send a test email using the HTML new-release notification template.
+        """
+        self.releases = SAMPLE_RELEASES
+        self.subject = "deemon Test Notification (HTML)"
+        self.send(test=True)
 
     def expired_arl(self):
         """
@@ -200,5 +235,6 @@ class Notify:
         html_output = html_output.replace("{DEEMON_VER}", app_version)
         html_output = html_output.replace("{PY_VER}", py_version)
         html_output = html_output.replace("{SYS_VER}", sys_version)
+        html_output = html_output.replace("{GITHUB_REPO_URL}", get_github_repo_url())
 
         return html_output
