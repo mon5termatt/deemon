@@ -15,7 +15,28 @@ parent: Commands
 
 ---
 ## SMTP settings test
-To verify that your SMTP settings are correctly configured, you may use `test --email` to send a test email to yourself. If you don't receive the email, confirm your SMTP settings with your mail provider and check the logs for additional information.
+
+deemon provides two ways to verify email notifications.
+
+### Plaintext test
+
+Use `test --email` to confirm SMTP connectivity with a simple plaintext message:
+
+```bash
+$ deemon test --email
+```
+
+### HTML test
+
+Use `test --email-html` to send a preview of the real new-release notification email, including sample album art and formatting:
+
+```bash
+$ deemon test --email-html
+```
+
+This is useful for confirming that HTML rendering and album cover images display correctly in your mail client.
+
+If you don't receive either test email, confirm your SMTP settings with your mail provider and check the logs for additional information.
 
 ---
 ## Exclusions test

@@ -36,11 +36,28 @@ user@localhost:~$ deemon download --artist-id 100
 ```
 
 ### Download by URL
-In the below example, you can download a specific URL (artist, album, track or playlist):
+
+You can download a specific URL for an artist, album, track, or playlist:
 
 ```bash
-user@localhost:~$ deemon download --url https://...
+user@localhost:~$ deemon download --url https://www.deezer.com/en/album/1234
 ```
+
+Deezer short and share links are also supported. deemon follows redirects and resolves them to the final Deezer URL before downloading:
+
+```bash
+user@localhost:~$ deemon download --url https://deezer.page.link/abc123
+user@localhost:~$ deemon download --url https://dzr.page.link/abc123
+user@localhost:~$ deemon download --url https://link.deezer.com/s/abc123
+```
+
+Supported short link formats:
+
+- `https://deezer.page.link/<id>`
+- `https://dzr.page.link/<id>`
+- `https://link.deezer.com/s/<id>`
+
+Canonical Deezer URLs with query parameters (for example `?utm_campaign=...`) are also supported.
 
 ### Download all monitored artists
 If you'd like to download all releases by all artists currently being monitored, you can use the `--monitored` option to do so:

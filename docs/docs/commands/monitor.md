@@ -41,6 +41,21 @@ Monitoring by URL was implemented with the intention of using it for integration
 ```bash
 $ deemon monitor --url https://www.deezer.com/us/artist/1234
 ```
+
+Deezer short and share links are also supported. deemon follows redirects and extracts the artist ID from the resolved URL:
+
+```bash
+$ deemon monitor --url https://deezer.page.link/abc123
+$ deemon monitor --url https://dzr.page.link/abc123
+$ deemon monitor --url https://link.deezer.com/s/abc123
+```
+
+Supported short link formats:
+
+- `https://deezer.page.link/<id>`
+- `https://dzr.page.link/<id>`
+- `https://link.deezer.com/s/<id>`
+
 ## Monitor by Playlist
 
 Deemon will monitor the playlist URL, and will download any new additions to the playlist.
